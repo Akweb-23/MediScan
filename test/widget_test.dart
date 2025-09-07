@@ -11,9 +11,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mediscanai/main.dart';
 
 void main() {
+  // The test is now active because the comment markers have been removed.
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(MediScanApp());
+    // Added 'const' for better performance and to follow best practices.
+    await tester.pumpWidget(const MyApp());
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);
