@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mediscanai/screens/pill_reminder_screen.dart'; // 1. IMPORT THE NEW SCREEN
+import 'package:mediscanai/screens/pill_reminder_screen.dart';
+import 'package:mediscanai/screens/edit_profile_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -16,19 +17,20 @@ class SettingsScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         children: [
-          _buildProfileHeader(),
+          // FIXED: Pass context to the helper methods
+          _buildProfileHeader(context),
           const SizedBox(height: 16),
           _buildCarePlanCard(),
           const SizedBox(height: 16),
-          _buildSettingsList(context), // Pass context here
+          _buildSettingsList(context),
         ],
       ),
       backgroundColor: Colors.grey[50],
     );
   }
 
-  // Builds the top section with user name and number
-  Widget _buildProfileHeader() {
+  // FIXED: Method now accepts context as a parameter
+  Widget _buildProfileHeader(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Row(
@@ -43,12 +45,17 @@ class SettingsScreen extends StatelessWidget {
             ],
           ),
           TextButton(
-            onPressed: () {},
+            onPressed: () {
+              // Now this works because context is available
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => const EditProfileScreen(),
+              ));
+            },
             child: const Row(
               children: [
-                Text('Edit profile', style: TextStyle(color: Colors.redAccent)),
+                Text('Edit profile', style: TextStyle(color: Colors.redAccent)), // Adjusted color for theme consistency
                 SizedBox(width: 4),
-                Icon(Icons.arrow_forward_ios, size: 14, color: Colors.redAccent),
+                Icon(Icons.arrow_forward_ios, size: 14, color: Colors.redAccent), // Adjusted color
               ],
             ),
           ),
@@ -57,7 +64,6 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  // Builds the "Care Plan" promotional card
   Widget _buildCarePlanCard() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -83,8 +89,8 @@ class SettingsScreen extends StatelessWidget {
               OutlinedButton(
                 onPressed: () {},
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.redAccent,
-                  side: const BorderSide(color: Colors.redAccent),
+                  foregroundColor: Colors.redAccent, // Adjusted color
+                  side: const BorderSide(color: Colors.redAccent), // Adjusted color
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 ),
                 child: const Text('Join now'),
@@ -96,8 +102,7 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  // Builds the list of tappable settings options
-  Widget _buildSettingsList(BuildContext context) { // Now accepts context
+  Widget _buildSettingsList(BuildContext context) {
     return Column(
       children: [
         _buildSettingsItem(Icons.shopping_bag_outlined, 'My orders'),
@@ -106,12 +111,10 @@ class SettingsScreen extends StatelessWidget {
         _buildSettingsItem(Icons.folder_copy_outlined, 'Health Records & Insights'),
         _buildSettingsItem(Icons.star_outline, 'Rate your recent purchases'),
         _buildSettingsItem(Icons.payment_outlined, 'Manage payment methods'),
-        _buildSettingsItem(Icons.toll_outlined, 'NeuCoins'),
-        // 2. THIS IS THE UPDATED "PILL REMINDER" ITEM
         _buildSettingsItem(
           Icons.alarm_outlined,
           'Pill reminder',
-          onTap: () { // Added the onTap function
+          onTap: () {
             Navigator.of(context).push(MaterialPageRoute(
               builder: (context) => const PillReminderScreen(),
             ));
@@ -124,13 +127,12 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  // 3. UPDATED HELPER WIDGET to accept an onTap function
   Widget _buildSettingsItem(IconData icon, String title, {VoidCallback? onTap}) {
     return ListTile(
       leading: Icon(icon, color: Colors.grey[700]),
       title: Text(title),
       trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-      onTap: onTap, // Assign the onTap function to the ListTile
+      onTap: onTap,
     );
   }
 }

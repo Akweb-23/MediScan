@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mediscanai/screens/all_categories_screen.dart';
 import 'package:mediscanai/screens/settings_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
-
+import 'package:mediscanai/screens/profile_screen.dart';
+import 'package:mediscanai/screens/edit_profile_screen.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -280,7 +281,10 @@ class _HomeScreenState extends State<HomeScreen> {
           _buildNavItem(icon: Icons.home_outlined, label: 'Home', isSelected: true, onTap: () {}),
           _buildNavItem(icon: Icons.chat_bubble_outline, label: 'AI Chat', onTap: () {}),
           const SizedBox(width: 40),
-          _buildNavItem(icon: Icons.person_pin_circle_outlined, label: 'Profile', onTap: () {}),
+          _buildNavItem(icon: Icons.person_pin_circle_outlined, label: 'Profile', onTap: () {
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) => const ProfileScreen(),
+            ));
+          }),
           _buildNavItem(
             icon: Icons.settings_outlined,
             label: 'Settings',
