@@ -5,6 +5,10 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:mediscanai/screens/profile_screen.dart';
 import 'package:mediscanai/screens/edit_profile_screen.dart';
 import 'package:mediscanai/ocr_page.dart';
+import 'package:mediscanai/screens/dashboard_screen.dart';
+// NEW: Import the ChatScreen from the separate chatbot file
+import 'package:mediscanai/models//chatbot.dart'; // Assuming chatbot.dart is in the root lib folder or an appropriate path
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -79,6 +83,20 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // UPDATED: This function now navigates to the DashboardScreen
+  void _openMedicalRecords() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => const DashboardScreen()),
+    );
+  }
+
+  // NEW: Function to open the ChatScreen
+  void _openChatbot() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => const ChatScreen()), // Navigate to the imported ChatScreen
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -97,7 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 20),
                   _buildPromoBanner(),
                   const SizedBox(height: 20),
-                  _buildUploadButton(),
+                  _buildUploadButton(), // Stays as the OCR button
                   const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -124,17 +142,13 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       bottomNavigationBar: _buildBottomNavBar(),
+      // Action is now linked to the DashboardScreen
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => OCRPage()),
-          );
-        },
+        onPressed: _openMedicalRecords, // Calls function to open DashboardScreen
         backgroundColor: Colors.cyan[400],
         shape: const CircleBorder(),
-        child: const Icon(Icons.document_scanner_outlined, color: Colors.white),
+        child: const Icon(Icons.folder_shared_outlined, color: Colors.white), // Icon remains 'record saving'
       ),
-
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
@@ -241,7 +255,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildUploadButton() {
     return ElevatedButton.icon(
-      onPressed: () {},
+      onPressed: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => OCRPage()),
+        );
+      },
       icon: const Icon(Icons.document_scanner_outlined, color: Colors.white),
       label: const Text('Upload your prescription', style: TextStyle(color: Colors.white)),
       style: ElevatedButton.styleFrom(
@@ -285,7 +303,8 @@ class _HomeScreenState extends State<HomeScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _buildNavItem(icon: Icons.home_outlined, label: 'Home', isSelected: true, onTap: () {}),
-          _buildNavItem(icon: Icons.chat_bubble_outline, label: 'AI Chat', onTap: () {}),
+          // MODIFIED: 'AI Chat' item now calls _openChatbot()
+          _buildNavItem(icon: Icons.chat_bubble_outline, label: 'AI Chat', onTap: _openChatbot),
           const SizedBox(width: 40),
           _buildNavItem(icon: Icons.person_pin_circle_outlined, label: 'Profile', onTap: () {
             Navigator.of(context).push(MaterialPageRoute(builder: (context) => const ProfileScreen(),
@@ -305,14 +324,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // FIXED: Reduced vertical padding to prevent overflow
   Widget _buildNavItem({required IconData icon, required String label, bool isSelected = false, required VoidCallback onTap}) {
     final color = isSelected ? Colors.cyan[400] : Colors.grey;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0), // Changed from 8.0 to 4.0
+        padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

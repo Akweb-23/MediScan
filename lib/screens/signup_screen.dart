@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'verify_screen.dart';
+// import 'verify_screen.dart'; // We don't need this import anymore
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -131,33 +131,60 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<void> _signUpUser() async {
+    // Basic input validation
+    if (_emailController.text.trim().isEmpty || _passwordController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in both email and password.')),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
+
     try {
       final UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
 
-      // Optional: You can save username/contact to Firestore here
-
-      // Navigate to VerifyScreen after successful sign-up
+      // --- MODIFIED SUCCESS LOGIC ---
       if (userCredential.user != null) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const VerifyScreen()),
+        // 1. Show the success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ Registration successful! Please log in.'),
+            backgroundColor: Colors.green, // Visual feedback for success
+            duration: Duration(seconds: 3),
+          ),
         );
+
+        // 2. Clear fields and navigate back to the Login screen
+        _usernameController.clear();
+        _contactController.clear();
+        _emailController.clear();
+        _passwordController.clear();
+
+        // Navigate back to the previous screen (presumably the Login screen)
+        // Ensure this is not called before the SnackBar has time to show,
+        // though `pushReplacement` in the old logic also had the same concern.
+        // Using `pop()` here is common for returning to the login page.
+        Navigator.of(context).pop();
       }
     } on FirebaseAuthException catch (e) {
-      String message = 'An error occurred';
+      String message = 'An unknown error occurred during registration.';
       if (e.code == 'email-already-in-use') {
         message = 'This email is already registered.';
       } else if (e.code == 'weak-password') {
         message = 'Password should be at least 6 characters.';
+      } else if (e.code == 'invalid-email') {
+        message = 'The email address is not valid.';
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message)),
       );
     } finally {
+      // Ensure loading state is reset
       setState(() => _isLoading = false);
     }
   }

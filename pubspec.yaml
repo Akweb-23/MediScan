@@ -46,6 +46,15 @@ dependencies:
   flutter_local_notifications: ^19.4.2
   build_runner: ^2.5.4
   hive_generator: ^2.0.1
+  file_picker: ^8.0.0
+  path_provider: ^2.1.2
+
+  open_filex: ^4.3.2 # Check for the latest version
+  google_maps_flutter: ^2.3.0
+  geolocator: ^14.0.2   # correct package name and latest stable version
+  geocoding: ^2.1.6
+
+
 
 dev_dependencies:
   flutter_test:
