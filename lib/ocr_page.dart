@@ -10,10 +10,17 @@ class OCRPage extends StatefulWidget {
 
 class _OCRPageState extends State<OCRPage> {
   File? _image;
-  String _extractedText = "No text found yet";
-  bool _isProcessing = false; // Added for a loading indicator
+  // Use a TextEditingController to manage the editable text field
+  final TextEditingController _textController = TextEditingController(text: "No text found yet");
+  bool _isProcessing = false;
 
   final ImagePicker _picker = ImagePicker();
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
 
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await _picker.pickImage(source: source);
@@ -21,7 +28,7 @@ class _OCRPageState extends State<OCRPage> {
     if (pickedFile != null) {
       setState(() {
         _image = File(pickedFile.path);
-        _extractedText = "Processing image...";
+        _textController.text = "Processing image...";
         _isProcessing = true;
       });
       _recognizeText(_image!);
@@ -35,15 +42,13 @@ class _OCRPageState extends State<OCRPage> {
     try {
       final RecognizedText recognizedText = await textRecognizer.processImage(inputImage);
 
-      setState(() {
-        _extractedText = recognizedText.text.isNotEmpty
-            ? recognizedText.text
-            : "No text found yet";
-      });
+      // Update the controller's text instead of a simple String variable
+      _textController.text = recognizedText.text.isNotEmpty
+          ? recognizedText.text
+          : "No text found yet";
+
     } catch (e) {
-      setState(() {
-        _extractedText = "Error during recognition.";
-      });
+      _textController.text = "Error during recognition.";
     } finally {
       setState(() {
         _isProcessing = false;
@@ -52,14 +57,25 @@ class _OCRPageState extends State<OCRPage> {
     }
   }
 
+  void _handleProceed() {
+    // Logic for the Proceed button goes here
+    // Example: show the final edited text
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Proceeding with edited text: ${_textController.text}"),
+        backgroundColor: Colors.teal,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Prescription OCR"), // Title kept the same
-        backgroundColor: Colors.teal, // Teal AppBar color
+        title: const Text("Prescription OCR"),
+        backgroundColor: Colors.teal,
       ),
-      body: SingleChildScrollView( // Use SingleChildScrollView for better UI handling
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -101,10 +117,10 @@ class _OCRPageState extends State<OCRPage> {
             // --- Button Section ---
             ElevatedButton.icon(
               icon: const Icon(Icons.camera),
-              label: const Text("Capture from Camera"), // Text kept the same
+              label: const Text("Capture from Camera"),
               onPressed: () => _pickImage(ImageSource.camera),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal, // Teal button color
+                backgroundColor: Colors.teal,
                 padding: const EdgeInsets.symmetric(vertical: 15),
               ),
             ),
@@ -112,10 +128,10 @@ class _OCRPageState extends State<OCRPage> {
 
             ElevatedButton.icon(
               icon: const Icon(Icons.image),
-              label: const Text("Pick from Gallery"), // Text kept the same
+              label: const Text("Pick from Gallery"),
               onPressed: () => _pickImage(ImageSource.gallery),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal.shade700, // Darker Teal for secondary button
+                backgroundColor: Colors.teal.shade700,
                 padding: const EdgeInsets.symmetric(vertical: 15),
               ),
             ),
@@ -126,12 +142,12 @@ class _OCRPageState extends State<OCRPage> {
 
             // --- Extracted Text Section ---
             const Text(
-              "Extracted Text:",
+              "Extracted Text (Editable):",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.teal),
             ),
             const SizedBox(height: 15),
 
-            // Show loading indicator or extracted text
+            // Show loading indicator or editable text field
             if (_isProcessing)
               const Center(
                 child: Padding(
@@ -140,18 +156,39 @@ class _OCRPageState extends State<OCRPage> {
                 ),
               )
             else
+            // Changed from Text to TextField
               Container(
-                padding: const EdgeInsets.all(15.0),
+                padding: const EdgeInsets.all(8.0),
                 decoration: BoxDecoration(
                   color: Colors.teal.shade50,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: Colors.teal, width: 1),
                 ),
-                child: Text(
-                  _extractedText,
+                child: TextField(
+                  controller: _textController,
+                  maxLines: null, // Allows multiline input
+                  keyboardType: TextInputType.multiline,
+                  decoration: const InputDecoration(
+                    hintText: "Edit the extracted text here...",
+                    border: InputBorder.none, // Remove default border
+                  ),
                   style: const TextStyle(fontSize: 16, color: Colors.black87, height: 1.5),
                 ),
               ),
+
+            const SizedBox(height: 20),
+
+            // --- Proceed Button ---
+            ElevatedButton.icon(
+              onPressed: _handleProceed,
+              icon: const Icon(Icons.check_circle_outline),
+              label: const Text("Proceed"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green.shade600, // Use a distinct color for the action
+                padding: const EdgeInsets.symmetric(vertical: 15),
+                textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
           ],
         ),
       ),

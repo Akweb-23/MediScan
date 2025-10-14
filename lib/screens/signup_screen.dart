@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'verify_screen.dart'; // This will now work because we are about to create the file
+import 'package:firebase_auth/firebase_auth.dart';
+import 'verify_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -9,7 +10,15 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
+  final _auth = FirebaseAuth.instance;
+
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _contactController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
   bool _isPasswordVisible = false;
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -25,17 +34,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SizedBox(height: 20),
-            // Username Field
-            _buildTextField(label: 'Username', icon: Icons.person_outline),
+            _buildTextField(label: 'Username', controller: _usernameController, icon: Icons.person_outline),
             const SizedBox(height: 20),
-            // Contact Number Field (FIXED ICON)
-            _buildTextField(label: 'Contact Number', icon: Icons.phone_outlined, keyboardType: TextInputType.phone),
+            _buildTextField(
+              label: 'Contact Number',
+              controller: _contactController,
+              icon: Icons.phone_outlined,
+              keyboardType: TextInputType.phone,
+            ),
             const SizedBox(height: 20),
-            // Email Field (FIXED ICON)
-            _buildTextField(label: 'Email', icon: Icons.email_outlined, keyboardType: TextInputType.emailAddress),
+            _buildTextField(
+              label: 'Email',
+              controller: _emailController,
+              icon: Icons.email_outlined,
+              keyboardType: TextInputType.emailAddress,
+            ),
             const SizedBox(height: 20),
-            // Password Field
             TextField(
+              controller: _passwordController,
               obscureText: !_isPasswordVisible,
               decoration: InputDecoration(
                 labelText: 'Password',
@@ -54,12 +70,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
             ),
             const SizedBox(height: 40),
-            // The button is labeled Login in your design, but "Continue" might be more accurate
             ElevatedButton(
-              onPressed: () {
-                // Navigate to the Verify Account screen
-                Navigator.of(context).push(MaterialPageRoute(builder: (_) => const VerifyScreen()));
-              },
+              onPressed: _isLoading ? null : _signUpUser,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.cyan[400],
                 foregroundColor: Colors.white,
@@ -68,10 +80,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   borderRadius: BorderRadius.circular(30),
                 ),
               ),
-              child: const Text('Login', style: TextStyle(fontSize: 16)),
+              child: _isLoading
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text('Sign Up', style: TextStyle(fontSize: 16)),
             ),
             const SizedBox(height: 20),
-            // "Already have account?" Text Button
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
@@ -98,9 +111,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  // Helper method to avoid repetitive code for text fields
-  Widget _buildTextField({required String label, required IconData icon, TextInputType keyboardType = TextInputType.text}) {
+  Widget _buildTextField({
+    required String label,
+    required TextEditingController controller,
+    required IconData icon,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
     return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon),
@@ -108,8 +127,38 @@ class _SignUpScreenState extends State<SignUpScreen> {
           borderRadius: BorderRadius.circular(10),
         ),
       ),
-      keyboardType: keyboardType,
     );
   }
-}
 
+  Future<void> _signUpUser() async {
+    setState(() => _isLoading = true);
+    try {
+      final UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      // Optional: You can save username/contact to Firestore here
+
+      // Navigate to VerifyScreen after successful sign-up
+      if (userCredential.user != null) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const VerifyScreen()),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      String message = 'An error occurred';
+      if (e.code == 'email-already-in-use') {
+        message = 'This email is already registered.';
+      } else if (e.code == 'weak-password') {
+        message = 'Password should be at least 6 characters.';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+}
