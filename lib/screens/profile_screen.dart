@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:mediscanai/screens/edit_profile_screen.dart';
+import 'package:mediscanai/screens/user_model.dart'; // <--- UPDATED IMPORT
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Access the live user data from the service
+    final user = UserProfileService().currentUser;
+
     return Scaffold(
       body: Column(
         children: [
-          _buildProfileHeader(context),
+          _buildProfileHeader(context, user),
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -20,7 +24,8 @@ class ProfileScreen extends StatelessWidget {
                   title: 'Edit Profile',
                   onTap: () {
                     Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => const EditProfileScreen(),
+                      // Pass user data to the edit screen
+                      builder: (context) => EditProfileScreen(user: user),
                     ));
                   },
                 ),
@@ -39,32 +44,34 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileHeader(BuildContext context) {
+  // ... (rest of the helper methods remain the same) ...
+
+  Widget _buildProfileHeader(BuildContext context, UserModel user) {
     return Container(
       width: double.infinity,
-      color: Colors.blue[700],
+      color: Colors.cyan[600],
       padding: const EdgeInsets.only(top: 60.0, bottom: 24.0),
-      child: const Column(
+      child: Column(
         children: [
           CircleAvatar(
             radius: 40,
-            backgroundImage: NetworkImage('https://placehold.co/100x100/EFEFEF/3B3B3B?text=CS'),
+            backgroundImage: NetworkImage(user.avatarUrl),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Text(
-            'Chandrima Saha',
-            style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+            '${user.firstName} ${user.lastName}',
+            style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Text(
-            'Chandrima.Saha@gmail.com',
-            style: TextStyle(color: Colors.white70, fontSize: 14),
+            user.email,
+            style: const TextStyle(color: Colors.white70, fontSize: 14),
           ),
         ],
       ),
     );
   }
-
+  // ... (buildProfileItem and buildLogoutButton remain the same) ...
   Widget _buildProfileItem(BuildContext context, {required IconData icon, required String title, VoidCallback? onTap}) {
     return ListTile(
       leading: Icon(icon, color: Colors.grey[700]),
@@ -84,7 +91,7 @@ class ProfileScreen extends StatelessWidget {
         icon: const Icon(Icons.logout, color: Colors.white),
         label: const Text('Log Out', style: TextStyle(color: Colors.white)),
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue[700],
+          backgroundColor: Colors.cyan[600],
           minimumSize: const Size(double.infinity, 50),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),

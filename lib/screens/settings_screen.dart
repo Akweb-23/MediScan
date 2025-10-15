@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:mediscanai/screens/pill_reminder_screen.dart';
 import 'package:mediscanai/screens/edit_profile_screen.dart';
+import 'package:mediscanai/screens/user_model.dart'; // <--- UPDATED IMPORT
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Access the live user data from the service
+    final user = UserProfileService().currentUser;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile & Settings'),
@@ -17,8 +21,7 @@ class SettingsScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         children: [
-          // FIXED: Pass context to the helper methods
-          _buildProfileHeader(context),
+          _buildProfileHeader(context, user), // Pass user data
           const SizedBox(height: 16),
           _buildCarePlanCard(),
           const SizedBox(height: 16),
@@ -29,33 +32,33 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  // FIXED: Method now accepts context as a parameter
-  Widget _buildProfileHeader(BuildContext context) {
+  // UPDATED: Uses UserModel data
+  Widget _buildProfileHeader(BuildContext context, UserModel user) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Hey there!', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-              SizedBox(height: 4),
-              Text('9767994567', style: TextStyle(fontSize: 16, color: Colors.grey)),
+              Text('Hey ${user.firstName}!', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              Text(user.mobileNumber, style: const TextStyle(fontSize: 16, color: Colors.grey)),
             ],
           ),
           TextButton(
             onPressed: () {
-              // Now this works because context is available
+              // Pass user data to the edit screen
               Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => const EditProfileScreen(),
+                builder: (context) => EditProfileScreen(user: user),
               ));
             },
-            child: const Row(
+            child: Row(
               children: [
-                Text('Edit profile', style: TextStyle(color: Colors.redAccent)), // Adjusted color for theme consistency
-                SizedBox(width: 4),
-                Icon(Icons.arrow_forward_ios, size: 14, color: Colors.redAccent), // Adjusted color
+                Text('Edit profile', style: TextStyle(color: Colors.cyan[600])),
+                const SizedBox(width: 4),
+                Icon(Icons.arrow_forward_ios, size: 14, color: Colors.cyan[600]),
               ],
             ),
           ),
@@ -64,6 +67,7 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
+  // ... (rest of the settings screen widgets remain the same) ...
   Widget _buildCarePlanCard() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -89,8 +93,8 @@ class SettingsScreen extends StatelessWidget {
               OutlinedButton(
                 onPressed: () {},
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.redAccent, // Adjusted color
-                  side: const BorderSide(color: Colors.redAccent), // Adjusted color
+                  foregroundColor: Colors.cyan[600],
+                  side: BorderSide(color: Colors.cyan.shade600),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 ),
                 child: const Text('Join now'),
@@ -136,4 +140,3 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 }
-

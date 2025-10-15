@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:mediscanai/models/medical_files.dart';
-import 'package:mediscanai/screens/NearbyMedicalsMapScreen.dart'; // Ensure this path is correct
 
 class AddFileScreen extends StatefulWidget {
   final Function(MedicalFile) onFileSaved;
@@ -90,23 +89,9 @@ class _AddFileScreenState extends State<AddFileScreen> {
             const SizedBox(height: 15),
 
             // --- Find Nearby Medicals Button (MOVED HERE) ---
-            // This button is now visible whether a file is selected or not.
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => NearbyMedicalsMapScreen()),
-                );
-              },
-              icon: const Icon(Icons.map),
-              label: const Text("Find Nearby Medicals"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal.shade400, // Slightly lighter teal for distinction
-                padding: const EdgeInsets.symmetric(vertical: 15),
-                textStyle: const TextStyle(fontSize: 16),
-              ),
-            ),
-            const SizedBox(height: 30),
+            // This button is now visible whether a file is sele
+            // cted or not.
+
 
             if (_selectedFile != null) ...[
               const Text(

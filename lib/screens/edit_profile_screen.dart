@@ -1,39 +1,60 @@
 import 'package:flutter/material.dart';
+import 'package:mediscanai/screens/user_model.dart'; // <--- NEW IMPORT
 
 class EditProfileScreen extends StatelessWidget {
-  const EditProfileScreen({super.key});
+  // UPDATED: Constructor now requires the UserModel
+  final UserModel user;
+  const EditProfileScreen({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Edit Profile'),
-        backgroundColor: Colors.blue[700],
+        backgroundColor: Colors.cyan[600], // Changed from Blue
         foregroundColor: Colors.white,
         elevation: 0,
       ),
       body: Column(
         children: [
-          _buildEditProfileHeader(),
+          _buildEditProfileHeader(user), // Pass user data
           Expanded(
             child: ListView(
               padding: const EdgeInsets.all(16.0),
               children: [
-                _buildInfoField(label: 'First Name', value: 'Chandrima'),
-                _buildInfoField(label: 'Last Name', value: 'Saha'),
+                _buildInfoField(label: 'First Name', value: user.firstName), // Use user data
+                _buildInfoField(label: 'Last Name', value: user.lastName), // Use user data
                 _buildInfoField(
                   label: 'Email',
-                  value: 'Chandrima.Saha@gmail.com',
+                  value: user.email, // Use user data
                 ),
-                _buildInfoField(label: 'Mobile Number', value: '01784939738'),
+                _buildInfoField(label: 'Mobile Number', value: user.mobileNumber), // Use user data
                 _buildInfoField(
                   label: 'Password',
-                  value: '**********',
+                  value: user.passwordPlaceholder, // Use user data
                   isProtected: true,
                 ),
-                _buildInfoField(label: 'Date of Birth', value: '02-05-2000'),
-                _buildInfoField(label: 'Gender', value: 'Female'),
+                _buildInfoField(label: 'Date of Birth', value: user.dob), // Use user data
+                _buildInfoField(label: 'Gender', value: user.gender), // Use user data
               ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton(
+              onPressed: () {
+                // TODO: Implement save logic
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Profile changes saved!')),
+                );
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.cyan[600],
+                minimumSize: const Size(double.infinity, 50),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text('Save Changes', style: TextStyle(color: Colors.white)),
             ),
           ),
         ],
@@ -41,18 +62,17 @@ class EditProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildEditProfileHeader() {
+  // UPDATED: Accepts UserModel
+  Widget _buildEditProfileHeader(UserModel user) {
     return Container(
       width: double.infinity,
-      color: Colors.blue[700],
+      color: Colors.cyan[600], // Changed from Blue
       padding: const EdgeInsets.only(bottom: 24.0),
-      child: const Column(
+      child: Column(
         children: [
           CircleAvatar(
             radius: 40,
-            backgroundImage: NetworkImage(
-              'https://placehold.co/100x100/EFEFEF/3B3B3B?text=CS',
-            ),
+            backgroundImage: NetworkImage(user.avatarUrl), // Use user data
           ),
         ],
       ),
@@ -64,6 +84,7 @@ class EditProfileScreen extends StatelessWidget {
     required String value,
     bool isProtected = false,
   }) {
+    // ... (unchanged)
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12.0),
       child: Column(

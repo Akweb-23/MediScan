@@ -6,8 +6,8 @@ import 'package:mediscanai/screens/profile_screen.dart';
 import 'package:mediscanai/screens/edit_profile_screen.dart';
 import 'package:mediscanai/ocr_page.dart';
 import 'package:mediscanai/screens/dashboard_screen.dart';
-// NEW: Import the ChatScreen from the separate chatbot file
-import 'package:mediscanai/models//chatbot.dart'; // Assuming chatbot.dart is in the root lib folder or an appropriate path
+import 'package:mediscanai/screens/NearByMedicalsMapScreen.dart';
+import 'package:mediscanai/models//chatbot.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -83,17 +83,15 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // UPDATED: This function now navigates to the DashboardScreen
   void _openMedicalRecords() {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (context) => const DashboardScreen()),
     );
   }
 
-  // NEW: Function to open the ChatScreen
   void _openChatbot() {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const ChatScreen()), // Navigate to the imported ChatScreen
+      MaterialPageRoute(builder: (context) => const ChatScreen()),
     );
   }
 
@@ -115,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 20),
                   _buildPromoBanner(),
                   const SizedBox(height: 20),
-                  _buildUploadButton(), // Stays as the OCR button
+                  _buildUploadButton(),
                   const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -142,13 +140,18 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       bottomNavigationBar: _buildBottomNavBar(),
-      // Action is now linked to the DashboardScreen
+
+      // IMPROVEMENT: Use the default FloatingActionButton size/style
       floatingActionButton: FloatingActionButton(
-        onPressed: _openMedicalRecords, // Calls function to open DashboardScreen
+        onPressed: _openMedicalRecords,
         backgroundColor: Colors.cyan[400],
+        // Use default shape for better centering in the standard notch
         shape: const CircleBorder(),
-        child: const Icon(Icons.folder_shared_outlined, color: Colors.white), // Icon remains 'record saving'
+        child: const Icon(Icons.folder_shared_outlined, color: Colors.white),
+        // OPTIONAL: Increase the size slightly if needed for better visual balance
+        // mini: false,
       ),
+      // IMPORTANT: FloatingActionButtonLocation must be exactly this for proper centering
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
@@ -296,28 +299,46 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildBottomNavBar() {
+    // The width of the space must be equal to the diameter of the FAB + 2*notchMargin
+    // Default FAB diameter is 56. With notchMargin 8.0, total space is roughly 72-80.
+    const double notchSpaceWidth = 72.0;
+
     return BottomAppBar(
       shape: const CircularNotchedRectangle(),
       notchMargin: 8.0,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _buildNavItem(icon: Icons.home_outlined, label: 'Home', isSelected: true, onTap: () {}),
-          // MODIFIED: 'AI Chat' item now calls _openChatbot()
-          _buildNavItem(icon: Icons.chat_bubble_outline, label: 'AI Chat', onTap: _openChatbot),
-          const SizedBox(width: 40),
-          _buildNavItem(icon: Icons.person_pin_circle_outlined, label: 'Profile', onTap: () {
-            Navigator.of(context).push(MaterialPageRoute(builder: (context) => const ProfileScreen(),
-            ));
-          }),
-          _buildNavItem(
-            icon: Icons.settings_outlined,
-            label: 'Settings',
-            onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => const SettingsScreen(),
-              ));
-            },
+          // Left Group (Home and AI Chat)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildNavItem(icon: Icons.home_outlined, label: 'Home', isSelected: true, onTap: () {}),
+              _buildNavItem(icon: Icons.chat_bubble_outline, label: 'AI Chat', onTap: _openChatbot),
+            ],
+          ),
+
+          // Central space to accommodate the FAB notch
+          const SizedBox(width: notchSpaceWidth),
+
+          // Right Group (Profile and Near Medicals)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildNavItem(icon: Icons.person_pin_circle_outlined, label: 'Profile', onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(builder: (context) => const ProfileScreen(),
+                ));
+              }),
+              _buildNavItem(
+                icon: Icons.location_on_outlined,
+                label: 'Near Medicals',
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => const NearbyMedicalsMapScreen(),
+                  ));
+                },
+              ),
+            ],
           ),
         ],
       ),
@@ -330,7 +351,7 @@ class _HomeScreenState extends State<HomeScreen> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 4.0),
+        padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
